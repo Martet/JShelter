@@ -89,7 +89,9 @@ function define_page_context_function(wrapper) {
 	else {
 		code += `${wrapper.wrapping_function_body}`
 	}
-	code += "};";
+	code += `
+	};
+	`;
 
 	if (typeof browser_polyfill_used === "undefined") {
 		code += `
