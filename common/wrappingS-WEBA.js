@@ -71,6 +71,7 @@
 	 *	* (1) - replace values by white noise based on domain key
 	 */
 	function audioFarble(array){
+		const len = array.byteLength;
 		if (wasm.ready && wasm.grow(array.byteLength)) {
 			farbleAudioWASM();
 		} else {
@@ -78,7 +79,6 @@
 		}
 		
 		function farbleAudioWASM() {
-			const len = array.byteLength;
 			wasm.set(array, 0, true);
 			const crc = wasm.crc16Float(len);
 			const mash = new Mash();
@@ -97,15 +97,15 @@
 			// See https://pagure.io/JShelter/webextension/issue/23
 			const MAXUINT32 = 4294967295;
 			let crc = new CRC16();
-			for (value of array) {
-				crc.single(value * MAXUINT32);
+			for (let i = 0; i < len; i++) {
+				crc.single(array[i] * MAXUINT32);
 			}
 			
 			console.debug("Timing audioFarble seed init", Date.now() - start_time);
 			var thisaudio_prng = alea(domainHash, "AudioFarbling", crc.crc);
 			console.debug("Timing audioFarble prng init", Date.now() - start_time);
 	
-			for (i in array) {
+			for (let i = 0; i < len; i++) {
 				// Possible improvements:
 				// Copy a neighbor data (possibly with modifications
 				// Make bigger canges than xoring with 1
@@ -115,6 +115,7 @@
 		}
 	};
 	function audioFarbleInt(array) {
+		const len = array.length;
 		if (wasm.ready && wasm.grow(array.byteLength)) {
 			farbleAudioIntWASM();
 		} else {
@@ -122,7 +123,6 @@
 		}
 
 		function farbleAudioIntWASM() {
-			const len = array.byteLength;
 			wasm.set(array);
 			const crc = wasm.crc16(len);
 			const mash = new Mash();
@@ -140,14 +140,14 @@
 			// audio is farbled the same way but different audio is farbled differently
 			// See https://pagure.io/JShelter/webextension/issue/23
 			let crc = new CRC16();
-			for (value of array) {
-				crc.single(value);
+			for (let i = 0; i < len; i++) {
+				crc.single(array[i]);
 			}
 			console.debug("Timing audioFarbleInt seed init", Date.now() - start_time);
 			var thisaudio_prng = alea(domainHash, "AudioFarbling", crc.crc);
 			console.debug("Timing audioFarbleInt prng init", Date.now() - start_time);
 	
-			for (i in array) {
+			for (let i = 0; i < len; i++) {
 				if (thisaudio_prng.get_bits(1)) { // Modify data with probability of 0.5
 					// Possible improvements:
 					// Copy a neighbor data (possibly with modifications
@@ -160,13 +160,15 @@
 	}
 	function whiteNoiseInt(array) {
 		noise_prng = alea(Date.now(), prng());
-		for (i in array) {
+		let len = array.length;
+		for (let i = 0; i < len; i++) {
 			array[i] = (noise_prng() * 256) | 0;
 		}
 	}
 	function whiteNoiseFloat(array) {
 		noise_prng = alea(Date.now(), prng());
-		for (i in array) {
+		let len = array.length;
+		for (let i = 0; i < len; i++) {
 			array[i] = (noise_prng() * 2) -1;
 		}
 	}
