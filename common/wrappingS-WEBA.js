@@ -91,7 +91,7 @@
 			mash.addData(domainHash);
 			mash.addData("AudioFarbling");
 			mash.addData(crc);
-			wasm.farbleAudio(len, mash.n | 0);
+			wasm.farbleFloats(len, mash.n | 0);
 			array.set(wasm.get(array.length, 0, true));
 		}
 
